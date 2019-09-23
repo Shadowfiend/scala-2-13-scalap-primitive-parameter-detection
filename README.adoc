@@ -1,0 +1,44 @@
+= `scalap` 2.13.[0|1] issue with constructor parameters
+
+This repo demonstrates an issue with scalap in Scala 2.13.0 and 2.13.1 whereby
+it does not report constructor parameters in the same way as Scala <2.12.
+
+To show this, run the following two commands:
+
+```
+$ sbt "++2.12.9 run"
+[info] Loading project definition from ...
+[info] Loading settings for project scala-2-13-scalap-primitive-parameter-detection from build.sbt ...
+[info] Set current project to scala-2-13-scalap-primitive-parameter-detection (in build ...)
+[info] Setting Scala version to 2.12.9 on 1 projects.
+[info] Reapplying settings...
+[info] Set current project to scala-2-13-scalap-primitive-parameter-detection (in build ...)
+[info] running code.Test 
+ - <init>: List(MethodSymbol(base, owner=2, flags=2000, info=15 ,None))
+ - <init>: List(MethodSymbol(base, owner=2, flags=2000, info=15 ,None))
+ - <init>: List(MethodSymbol(base, owner=2, flags=2000, info=15 ,None))
+[success] Total time: 1 s, completed Sep 22, 2019, 10:06:52 PM
+$ sbt "++2.13.1 run"
+[info] Loading project definition from ...
+[info] Loading settings for project scala-2-13-scalap-primitive-parameter-detection from build.sbt ...
+[info] Set current project to scala-2-13-scalap-primitive-parameter-detection (in build ...)
+[info] Setting Scala version to 2.13.1 on 1 projects.
+[info] Reapplying settings...
+[info] Set current project to scala-2-13-scalap-primitive-parameter-detection (in build ...)
+[info] running code.Test 
+ - <init>: List()
+ - <init>: List()
+ - <init>: List()
+[success] Total time: 1 s, completed Sep 22, 2019, 10:07:31 PM
+```
+
+In 2.12.9, the `MethodSignature` object for the constructor has one entry for
+`children`, the single constructor parameter. In 2.13.1, the object has no
+`children` at all, making it impossible to explore the constructor's
+parameters.
+
+== Context
+
+This was discovered while trying to make the tests for
+[`lift-json`](https://github.com/lift/framework/tree/master/core/json) run
+successfully for Scala 2.13.
